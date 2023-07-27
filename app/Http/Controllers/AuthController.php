@@ -62,7 +62,10 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Cerraste tu sesion, hasta próxima!']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cerraste tu sesion, hasta próxima!'
+        ]);
     }
 
     public function resetpass(Request $request)

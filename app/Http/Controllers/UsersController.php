@@ -38,9 +38,9 @@ class UsersController extends Controller
                 ], 401);
             } else {
                 return response()->json([
-                    'success' => false,
+                    'success' => true,
                     'usuario' => $getUser,
-                ], 401);
+                ], 200);
             }
         } catch (Exception $ex) {
             DB::rollBack();
@@ -61,9 +61,18 @@ class UsersController extends Controller
 
                 $inputs = $request->all();
 
+                if(empty($inputs['name']) || empty($inputs['username'])){
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Los campos NOMBRES Y APELLIDOS, USERNAME son obligatorios'
+                    ],500);
+                }
+
                 if (!empty($inputs['password'])) {
                     $inputs['password'] = Hash::make($inputs['password']);
-                } else {
+                }
+                else {
                     $inputs = Arr::except($inputs, array('password'));
                 }
 
@@ -75,12 +84,12 @@ class UsersController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Usuario actualizado satisfactoriamente'
-                ]);
+                ],200);
             }else{
                 return response()->json([
                     'success' => false,
                     'message' => 'El usuario que intentas actualizar, no existe o fue eliminado'
-                ]);
+                ],401);
             }
         } catch (Exception $ex) {
             DB::rollBack();

@@ -5,23 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
 Route::group([
-
     'middleware' => 'api',
     'prefix' => 'auth'
-
 ], function ($router) {
-
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -39,14 +26,14 @@ Route::group([
     Route::post('dropUser/{id}',[UsersController::class, 'deleteUser']);
 });
 
-
 Route::group([
     'middleware' => ['jwt.verify'],
     'prefix' => 'albums'
 ], function($router) {
-    Route::get('getAll', [AlbumController::class, 'getAll']);
+    Route::get('getAllAlbums', [AlbumController::class, 'getAll']);
+    Route::post('procFile', [AlbumController::class, 'uploadFile']);
     Route::post('create', [AlbumController::class, 'createAlbum']);
-    Route::get('getOne/{id}', [AlbumController::class, 'showAlbum']);
+    Route::get('getOne/{id}', [AlbumController::class, 'getOneAlbum']);
     Route::post('edit', [AlbumController::class, 'updatedAlbum']);
-    Route::post('delete', [AlbumController::class, 'delete']);
+    Route::post('deleteAlbum/{id}', [AlbumController::class, 'deleteAlbum']);
 });
