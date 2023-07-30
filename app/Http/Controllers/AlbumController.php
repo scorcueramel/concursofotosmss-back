@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Intervention\Image\Facades\Image;
 
 class AlbumController extends Controller
 {
@@ -52,14 +53,15 @@ class AlbumController extends Controller
 
             $album = new Album();
             $album->nombre = Str::upper($request->nombre);
-            if ($image = $request->file('portada')) {
-                $rutaGaurdada = 'storage/archivos/';
-                $imgRegis = date('YmdHis') . "." . $image->getClientOriginalExtension();
-                $image->move($rutaGaurdada, $imgRegis);
-                $album->portada = "$imgRegis";
-            } else {
-                $album->portada = null;
-            }
+            // if ($image = $request->file('portada')) {
+            //     $rutaGaurdada = 'storage/archivos/';
+            //     $imgRegis = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            //     $image->move($rutaGaurdada, $imgRegis);
+            //     $album->portada = "$imgRegis";
+            // } else {
+            //     $album->portada = null;
+            // }
+            $album->portada = $request->portada;
             $album->publicado = $request->publicado;
             $album->activo = true;
             $album->save();
@@ -195,8 +197,9 @@ class AlbumController extends Controller
         $response = array();
 
         if ($request->hasFile('portada')) {
-            $foto = $request->portada;
-            $path = $foto->store('storage/archivos/');
+            $portada = $request->portada;
+            $path = $portada->store('public/archivos/');
+
             $response = [
                 'filename' => basename($path)
             ];
