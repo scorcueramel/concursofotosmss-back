@@ -6,28 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAlbumsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('albums', function (Blueprint $table) {
             $table->id();
             $table->string('nombre',100);
-            $table->string('portada')->nullable(true);
+            $table->string('portada')->default('default.png')->nullable(true);
             $table->boolean('publicado')->default(true);
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('albums');

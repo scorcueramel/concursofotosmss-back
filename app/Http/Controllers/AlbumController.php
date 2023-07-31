@@ -9,14 +9,42 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
 
 class AlbumController extends Controller
 {
-    public function getAll()
+    public function getAlbumsActives()
     {
         try {
-            $albums = Album::where('activo', true)->get();
+            $albums = Album::where('activo', true)
+                ->where('publicado', '=', true)
+                ->get();
+            // $albums = Album::where('activo', true)->paginate(5);
+            return response()->json(
+                [
+                    'success' => true,
+                    'albums' => $albums
+                ],
+                200
+            );
+            DB::commit();
+        } catch (Exception $ex) {
+            DB::Rollback();
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => $ex->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    public function getAlbumsIanctives()
+    {
+        try {
+            $albums = Album::where('activo', true)
+                ->where('publicado', '=', false)
+                ->get();
             // $albums = Album::where('activo', true)->paginate(5);
             return response()->json(
                 [
@@ -53,14 +81,6 @@ class AlbumController extends Controller
 
             $album = new Album();
             $album->nombre = Str::upper($request->nombre);
-            // if ($image = $request->file('portada')) {
-            //     $rutaGaurdada = 'storage/archivos/';
-            //     $imgRegis = date('YmdHis') . "." . $image->getClientOriginalExtension();
-            //     $image->move($rutaGaurdada, $imgRegis);
-            //     $album->portada = "$imgRegis";
-            // } else {
-            //     $album->portada = null;
-            // }
             $album->portada = $request->portada;
             $album->publicado = $request->publicado;
             $album->activo = true;
@@ -110,7 +130,7 @@ class AlbumController extends Controller
     public function updatedAlbum(Request $request, $id)
     {
         DB::beginTransaction();
-        $actAlbum = Album::find($id)->where('activo', true);
+        $actAlbum = Album::where('id', $id)->where('activo', true);
         try {
             if (!empty($actAlbum)) {
                 $validator = Validator::make($request->all(), [
@@ -123,22 +143,23 @@ class AlbumController extends Controller
                     'nombre' => Str::upper($request->nombre),
                     'portada' => $request->portada,
                     'publicado' => $request->publicado,
-                    'activo' => $request->activo,
                 ]);
+
+                DB::commit();
+
+                return response()->json(
+                    [
+                        'success' => true,
+                        'message' => 'Albúm actualizado exitosamente'
+                    ],
+                    200
+                );
             } else return response()->json(
                 [
                     'success' => false,
                     'message' => 'Albúm no encontrado'
                 ],
                 404
-            );
-            DB::commit();
-            return response()->json(
-                [
-                    'success' => true,
-                    'album' => $actAlbum
-                ],
-                200
             );
         } catch (Exception $ex) {
             return response()->json([
@@ -209,9 +230,51 @@ class AlbumController extends Controller
             ]);
         } else {
             return response()->json([
-                'success'=>false,
-                'message'=>'Imagen no procesada'
+                'success' => false,
+                'message' => 'Imagen no procesada'
             ]);
+        }
+    }
+
+    public function publicateAlbum($id)
+    {
+        DB::beginTransaction();
+        $album = Album::find($id);
+
+        try {
+            if (!empty($album)) {
+                $album->update([
+                    'publicado' => true
+                ]);
+                DB::commit();
+            }
+            return response()->json(['success' => true, 'message' => 'Albúm publicado'], 200);
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DePublicateAlbum($id)
+    {
+        DB::beginTransaction();
+        $album = Album::find($id);
+
+        try {
+            if (!empty($album)) {
+                $album->update([
+                    'publicado' => false
+                ]);
+                DB::commit();
+            }
+            return response()->json(['success' => true, 'message' => 'Albúm oculto (despublicado)'], 200);
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => $ex->getMessage()
+            ], 500);
         }
     }
 }

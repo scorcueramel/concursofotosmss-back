@@ -30,10 +30,13 @@ Route::group([
     'middleware' => ['jwt.verify'],
     'prefix' => 'albums'
 ], function($router) {
-    Route::get('getAllAlbums', [AlbumController::class, 'getAll']);
+    Route::get('getAllAlbumsActives', [AlbumController::class, 'getAlbumsActives']);
+    Route::get('getAllAlbumsInactives', [AlbumController::class, 'getAlbumsIanctives']);
     Route::post('procFile', [AlbumController::class, 'uploadFile']);
     Route::post('create', [AlbumController::class, 'createAlbum']);
     Route::get('getOne/{id}', [AlbumController::class, 'getOneAlbum']);
-    Route::post('edit', [AlbumController::class, 'updatedAlbum']);
+    Route::post('updateAlbum/{id}', [AlbumController::class, 'updatedAlbum']);
     Route::post('deleteAlbum/{id}', [AlbumController::class, 'deleteAlbum']);
+    Route::get('publicate/{id}', [AlbumController::class, 'publicateAlbum']);
+    Route::get('depublicate/{id}', [AlbumController::class, 'DePublicateAlbum']);
 });
