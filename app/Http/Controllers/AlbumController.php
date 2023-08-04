@@ -15,6 +15,7 @@ class AlbumController extends Controller
     public function getAlbumsActives()
     {
         try {
+            DB::beginTransaction();
             $albums = Album::where('activo', true)
                 ->where('publicado', '=', true)
                 ->get();
@@ -42,6 +43,7 @@ class AlbumController extends Controller
     public function getAlbumsIanctives()
     {
         try {
+            DB::beginTransaction();
             $albums = Album::where('activo', true)
                 ->where('publicado', '=', false)
                 ->get();
@@ -106,7 +108,6 @@ class AlbumController extends Controller
 
     public function getOneAlbum($id)
     {
-
         DB::beginTransaction();
         $album = Album::where('id', $id)
             ->where('activo', true)->get();
@@ -154,14 +155,20 @@ class AlbumController extends Controller
                     ],
                     200
                 );
-            } else return response()->json(
-                [
-                    'success' => false,
-                    'message' => 'Albúm no encontrado'
-                ],
-                404
-            );
+            } else {
+                DB::rollBack();
+
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Albúm no encontrado'
+                    ],
+                    404
+                );
+            }
         } catch (Exception $ex) {
+            DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage()
@@ -177,8 +184,9 @@ class AlbumController extends Controller
 
         try {
 
-            $fotosAlbum = Foto::join('albums', 'albums.id', '=', 'fotos.album_id')
+            $fotosAlbum = Album::join('fotos', 'albums.id', '=', 'fotos.album_id')
                 ->where('albums.id', '=', $id)
+                ->select('albums.id')
                 ->get();
 
             if (count($fotosAlbum) > 0) {
@@ -187,8 +195,10 @@ class AlbumController extends Controller
 
                 return response()->json([
                     'success' => false,
+                    'severity' => 'error',
+                    'summary' => 'No Eliminado',
                     'message' => 'No se puede eliminar el albúm por que cuenta con fotos'
-                ]);
+                ], 200);
             } else {
 
                 $actAlbum->update([
@@ -199,8 +209,10 @@ class AlbumController extends Controller
 
                 return response()->json([
                     'success' => true,
+                    'severity' => 'success',
+                    'summary' =>  'Eliminado',
                     'message' => "Se elimino el albúm"
-                ]);
+                ], 200);
             }
         } catch (Exception $ex) {
 
@@ -208,6 +220,8 @@ class AlbumController extends Controller
 
             return response()->json([
                 'success' => false,
+                'severity' => 'error',
+                'summary' =>  'Error al eliminar',
                 'message' => $ex->getMessage()
             ], 500);
         }
@@ -248,10 +262,18 @@ class AlbumController extends Controller
                 ]);
                 DB::commit();
             }
-            return response()->json(['success' => true, 'message' => 'Albúm publicado'], 200);
+            return response()->json([
+                'success' => true,
+                'severity' => 'success',
+                'summary' => 'PUBLICADO',
+                'message' => 'Albúm publicado'
+            ], 200);
         } catch (Exception $ex) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
+                'severity' => 'error',
+                'summary' => 'Llama a soporte',
                 'message' => $ex->getMessage()
             ], 500);
         }
@@ -264,13 +286,38 @@ class AlbumController extends Controller
 
         try {
             if (!empty($album)) {
-                $album->update([
-                    'publicado' => false
-                ]);
-                DB::commit();
+                $fotosAlbum = Foto::join('albums', 'albums.id', '=', 'fotos.album_id')
+                    ->where('albums.id', '=', $id)
+                    ->get();
+
+                if (count($fotosAlbum) > 0) {
+
+                    DB::rollBack();
+
+                    return response()->json([
+                        'success' => false,
+                        'severity' => 'error',
+                        'summary' => 'No OCULTO',
+                        'message' => 'No se puede OCULTAR el albúm por que cuenta con fotos'
+                    ],200);
+                } else {
+
+                    $album->update([
+                        'publicado' => false
+                    ]);
+                    DB::commit();
+
+                    return response()->json([
+                        'success' => true,
+                        'severity' => 'success',
+                        'summary' => 'OCULTO',
+                        'message' => "Se OCULTO el albúm"
+                    ],200);
+                }
             }
             return response()->json(['success' => true, 'message' => 'Albúm oculto (despublicado)'], 200);
         } catch (Exception $ex) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $ex->getMessage()

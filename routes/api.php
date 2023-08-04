@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FotoController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
+// AUTENTICACION
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
@@ -16,6 +18,7 @@ Route::group([
     Route::post('resetpassword', [AuthController::class, 'resetpass']);
 });
 
+// GESTIÓN DE USUARIOS
 Route::group([
     'middleware' => ['jwt.verify'],
     'prefix' => 'users'
@@ -26,6 +29,7 @@ Route::group([
     Route::post('dropUser/{id}',[UsersController::class, 'deleteUser']);
 });
 
+// GESTIÓN DE ALBUNES
 Route::group([
     'middleware' => ['jwt.verify'],
     'prefix' => 'albums'
@@ -39,4 +43,17 @@ Route::group([
     Route::post('deleteAlbum/{id}', [AlbumController::class, 'deleteAlbum']);
     Route::get('publicate/{id}', [AlbumController::class, 'publicateAlbum']);
     Route::get('depublicate/{id}', [AlbumController::class, 'DePublicateAlbum']);
+});
+
+// GESTION DE FOTOS
+Route::group([
+    'middleware' => ['jwt.verify'],
+    'prefix' => 'fotos'
+], function($router){
+    Route::get('getAllFotos/{id}', [FotoController::class, 'getFotosAll']);
+    Route::post('create', [FotoController::class, 'createFoto']);
+    Route::post('procFile', [FotoController::class, 'uploadFile']);
+    Route::get('publicate/{id}', [FotoController::class, 'publicateFoto']);
+    Route::get('depublicate/{id}', [FotoController::class, 'dePublicateFoto']);
+    Route::get('getOne/{id}', [FotoController::class, 'getOnePhoto']);
 });
