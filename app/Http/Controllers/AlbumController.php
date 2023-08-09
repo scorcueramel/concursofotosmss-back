@@ -12,6 +12,11 @@ use Illuminate\Support\Str;
 
 class AlbumController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['getAlbumsActives']]);
+    }
+
     public function getAlbumsActives()
     {
         try {
@@ -20,6 +25,7 @@ class AlbumController extends Controller
                 ->where('publicado', '=', true)
                 ->get();
             // $albums = Album::where('activo', true)->paginate(5);
+            DB::commit();
             return response()->json(
                 [
                     'success' => true,
@@ -27,7 +33,6 @@ class AlbumController extends Controller
                 ],
                 200
             );
-            DB::commit();
         } catch (Exception $ex) {
             DB::Rollback();
             return response()->json(

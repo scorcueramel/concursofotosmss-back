@@ -3,6 +3,7 @@
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FotoController;
+use App\Http\Controllers\ReaccionController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,4 +57,16 @@ Route::group([
     Route::get('publicate/{id}', [FotoController::class, 'publicateFoto']);
     Route::get('depublicate/{id}', [FotoController::class, 'dePublicateFoto']);
     Route::get('getOne/{id}', [FotoController::class, 'getOnePhoto']);
+    Route::post('deleteFoto/{id}', [FotoController::class, 'deleteFoto']);
+    Route::post('updateFoto/{id}', [FotoController::class, 'updatedPhoto']);
+});
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'general'
+], function ($router) {
+    Route::get('albumPublico',[AlbumController::class,'getAlbumsActives']);
+    Route::get('fotosAlbumPublic/{id}',[FotoController::class,'getFotosAllStatePublic']);
+    Route::get('reaccion/{idFoto}/{idReact}/{ipClient}',[ReaccionController::class,'reaccion']);
+    Route::get('reacciones/{ip}',[ReaccionController::class,'reaccionesTodas']);
 });

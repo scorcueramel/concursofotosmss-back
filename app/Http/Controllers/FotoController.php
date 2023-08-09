@@ -39,7 +39,7 @@ class FotoController extends Controller
 
             return response()->json([
                 'success' => true,
-                'content' => $fotos
+                'content' => $fotos,
             ], 200);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -50,6 +50,7 @@ class FotoController extends Controller
             ], 500);
         }
     }
+
     public function createFoto(Request $request)
     {
         try {
@@ -97,6 +98,7 @@ class FotoController extends Controller
             ], 500);
         }
     }
+
     public function uploadFile(Request $request)
     {
         $response = array();
@@ -145,7 +147,7 @@ class FotoController extends Controller
     public function updatedPhoto(Request $request, $id)
     {
         DB::beginTransaction();
-        $actFoto = Foto::where('id', $id)->where('activo', true)->get();
+        $actFoto = Foto::where('id', $id)->where('activo', true);
         try {
             if (!empty($actFoto)) {
                 $validator = Validator::make($request->all(), [
@@ -197,16 +199,18 @@ class FotoController extends Controller
         DB::beginTransaction();
         $delFoto = Foto::find($id);
         try {
-            $reactionFoto = DB::table('fotos')
-                ->join('reaccions', 'fotos.id', '=', 'reacciones.foto_id')
-                ->where('fotos.id', $id)
-                ->where('fotos.activo', true)
-                ->get();
+            $reactionFoto = DB::select('select * from fotos f
+            inner join
+            reaccions r on
+            r.foto_id = f.id
+            where f.id = ? and f.activo = 1', [$id]);
 
             if (count($reactionFoto) > 0) {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
+                    'severity' => 'error',
+                    'summary' => 'No Eliminado',
                     'content' => 'No se puede eliminar la foto por que ya cuenta con reacciones'
                 ]);
             } else {
@@ -218,6 +222,8 @@ class FotoController extends Controller
 
                 return response()->json([
                     'success' => true,
+                    'severity' => 'success',
+                    'summary' => 'Foto Eliminada',
                     'content' => 'Se elimino la foto'
                 ]);
             }
@@ -226,6 +232,8 @@ class FotoController extends Controller
 
             return response()->json([
                 'success' => false,
+                'severity' => 'error',
+                'summary' => 'No Eliminado',
                 'content' => $ex->getMessage()
             ]);
         }
@@ -245,10 +253,9 @@ class FotoController extends Controller
             return response()->json([
                 'success' => true,
                 'severity' => 'success',
-                'summary' => 'OCULTO',
+                'summary' => 'PUBLICADO',
                 'content' => 'Foto Publicada'
             ], 200);
-
         } catch (Exception $ex) {
             DB::rollBack();
 
@@ -303,6 +310,46 @@ class FotoController extends Controller
                 'success' => false,
                 'severity' => 'error',
                 'summary' => 'OCULTO',
+                'content' => $ex->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFotosAllStatePublic($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $fotos = Foto::join('albums', 'albums.id', '=', 'fotos.album_id')
+                ->where('fotos.album_id', $id)
+                ->where(function ($query) {
+                    return $query
+                        ->where('fotos.activo', true)
+                        ->where('fotos.publicado', true);
+                })
+                ->select('fotos.id', 'fotos.nombre_participante', 'fotos.titulo', 'fotos.lugar', 'fotos.resenia', 'fotos.motivacion', 'fotos.archivo', 'fotos.activo', 'fotos.publicado', 'fotos.album_id')
+                ->get();
+
+            if (count($fotos) <= 0) {
+
+                return response()->json([
+                    'success' => true,
+                    'content' => 'No se encontraron fotos en este albúm',
+                    'code' => 201
+                ], 200);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'content' => $fotos
+            ], 200);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
                 'content' => $ex->getMessage()
             ], 500);
         }
