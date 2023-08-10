@@ -334,8 +334,7 @@ class FotoController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'content' => 'No se encontraron fotos en este albúm',
-                    'code' => 201
+                    'content' => []
                 ], 200);
             }
 
@@ -348,6 +347,28 @@ class FotoController extends Controller
         } catch (Exception $ex) {
             DB::rollBack();
 
+            return response()->json([
+                'success' => false,
+                'content' => $ex->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getOnePhotoPublic($id)
+    {
+        DB::beginTransaction();
+
+        $foto = Foto::where('id', $id)->where('activo', true)->get();
+
+        try {
+            if (is_null($foto)) {
+                return response()->json(['success' => false, 'content' => 'Foto no encontrada.'], 404);
+            } else {
+                DB::commit();
+                return response()->json(['success' => true, 'content' => $foto], 200);
+            }
+        } catch (Exception $ex) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'content' => $ex->getMessage()

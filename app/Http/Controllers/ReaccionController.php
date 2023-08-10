@@ -94,4 +94,24 @@ class ReaccionController extends Controller
             return response()->json($ex->getMessage());
         }
     }
+
+    public function conteoReacciones($id){
+        try {
+
+            DB::beginTransaction();
+            $reacciones = DB::select('select count(*) as conteo from reaccions r
+            where r.foto_id = ? and r.tipo_reaccion = ?', [$id,true]);
+            DB::commit();
+
+            return response()->json($reacciones,200);
+
+        } catch (Exception $ex) {
+            DB::rollback();
+
+            return response()->json([
+                'success'=>false,
+                'content'=>$ex->getMessage()
+            ],500);
+        }
+    }
 }

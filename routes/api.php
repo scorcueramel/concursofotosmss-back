@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FinalistasController;
 use App\Http\Controllers\FotoController;
 use App\Http\Controllers\ReaccionController;
 use App\Http\Controllers\UsersController;
@@ -69,4 +70,7 @@ Route::group([
     Route::get('fotosAlbumPublic/{id}',[FotoController::class,'getFotosAllStatePublic']);
     Route::get('reaccion/{idFoto}/{idReact}/{ipClient}',[ReaccionController::class,'reaccion']);
     Route::get('reacciones/{ip}',[ReaccionController::class,'reaccionesTodas']);
+    Route::get('getOnePhotoPublic/{id}', [FotoController::class, 'getOnePhotoPublic']);
+    Route::get('getReaccions/{id}', [ReaccionController::class, 'conteoReacciones']);
+    Route::get('getFinalists', [FinalistasController::class, 'finalists']);
 });
