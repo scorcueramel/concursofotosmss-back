@@ -13,13 +13,16 @@ class FinalistasController extends Controller
         try {
             DB::beginTransaction();
 
-            $top = DB::select('select f.id, f.nombre_participante , f.titulo, f.archivo ,f.fecha_carga , a.nombre as "album",
-            (select count(*) from reaccions r2 where  r2.foto_id = f.id) as total
-            from fotos f
-            inner join albums a
-            on f.album_id = a.id
-            order by total desc
-            limit 3');
+            $top = DB::select('select f.id, f.nombre_participante , f.titulo,
+            f.archivo ,f.fecha_carga , a.nombre as "album",r.tipo_reaccion,
+                        (select count(*) from reaccions r2 where  r2.foto_id = f.id) as total
+                        from fotos f
+                        inner join albums a
+                        on f.album_id = a.id
+                        inner join reaccions r
+                        on f.id = r.foto_id
+                        where r.tipo_reaccion = 1
+                        order by total desc');
 
             DB::commit();
 
