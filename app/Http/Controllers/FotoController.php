@@ -358,14 +358,18 @@ class FotoController extends Controller
     {
         DB::beginTransaction();
 
-        $foto = Foto::where('id', $id)->where('activo', true)->get();
+        $foto = Foto::where('fotos.id','=',$id)
+        ->where('fotos.activo','=',true)
+        ->get();
+
+        $ipReaccion = Reaccion::where('foto_id','=',$id)->get();
 
         try {
             if (is_null($foto)) {
                 return response()->json(['success' => false, 'content' => 'Foto no encontrada.'], 404);
             } else {
                 DB::commit();
-                return response()->json(['success' => true, 'content' => $foto], 200);
+                return response()->json(['success' => true, 'content' => $foto, 'ip' => $ipReaccion], 200);
             }
         } catch (Exception $ex) {
             DB::rollBack();

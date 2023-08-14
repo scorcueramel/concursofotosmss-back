@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Foto;
 use App\Models\Reaccion;
 use DateTime;
 use Exception;
@@ -11,19 +10,19 @@ use Illuminate\Support\Facades\DB;
 
 class ReaccionController extends Controller
 {
-    public function reaccion($idFoto, $idReaccion, $ip)
+    public function reaccion($idFoto, $idReaccion, Request $request)
     {
         // 1 = LIKE
         // 2 = DISLIKE
         DB::beginTransaction();
         try {
-            $ipid = DB::select('SELECT * FROM reaccions WHERE foto_id = ? AND terminal_ip = ?', [$idFoto, $ip]);
+            $ipid = DB::select('SELECT * FROM reaccions WHERE foto_id = ? AND terminal_ip = ?', [$idFoto, $request->ip()]);
             if ($idReaccion == 1 && count($ipid) <= 0) {
                 $reaccion = Reaccion::create([
                     'foto_id' => $idFoto,
                     'tipo_reaccion' => true,
                     'fecha' => new DateTime(now()),
-                    'terminal_ip' => $ip,
+                    'terminal_ip' => $request->ip(),
                 ]);
                 DB::commit();
                 return response()->json([
@@ -81,10 +80,10 @@ class ReaccionController extends Controller
         }
     }
 
-    public function reaccionesTodas($ip){
+    public function reaccionesTodas(Request $request){
         try {
             DB::beginTransaction();
-            $reacciones = Reaccion::where('terminal_ip',$ip)->get();
+            $reacciones = Reaccion::where('terminal_ip',$request->ip())->get();
             DB::commit();
 
             return response()->json($reacciones);
@@ -113,5 +112,13 @@ class ReaccionController extends Controller
                 'content'=>$ex->getMessage()
             ],500);
         }
+    }
+
+    public function getIpClient(Request $request){
+        DB::beginTransaction();
+        $ipObtn = DB::select('SELECT terminal_ip FROM reaccions WHERE terminal_ip = ?',[$request->ip()]);
+        DB::commit();
+
+        return response()->json($ipObtn);
     }
 }
