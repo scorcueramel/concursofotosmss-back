@@ -203,7 +203,7 @@ class FotoController extends Controller
             inner join
             reaccions r on
             r.foto_id = f.id
-            where f.id = ? and f.activo = 1', [$id]);
+            where f.id = ? and f.activo = true', [$id]);
 
             if (count($reactionFoto) > 0) {
                 DB::rollBack();
