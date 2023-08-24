@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\View;
 */
 
 Route::get('/', function () {
-    // View::addExtension('html', 'php');
-    // return View::make('index');
-    return view('welcome');
+    View::addExtension('html', 'php');
+    return View::make('index');
+    // return view('welcome');
 });
