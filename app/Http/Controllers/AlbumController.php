@@ -25,11 +25,13 @@ class AlbumController extends Controller
                 ->where('publicado', '=', true)
                 ->get();
             // $albums = Album::where('activo', true)->paginate(5);
+            $ipLocal = \request()->ip();
             DB::commit();
             return response()->json(
                 [
                     'success' => true,
-                    'albums' => $albums
+                    'albums' => $albums,
+                    'ipClient' => $ipLocal
                 ],
                 200
             );

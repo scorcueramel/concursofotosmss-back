@@ -366,6 +366,7 @@ class FotoController extends Controller
 
         try {
             if (is_null($foto)) {
+                DB::rollBack();
                 return response()->json(['success' => false, 'content' => 'Foto no encontrada.'], 404);
             } else {
                 DB::commit();
