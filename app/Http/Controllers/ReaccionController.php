@@ -10,19 +10,20 @@ use Illuminate\Support\Facades\DB;
 
 class ReaccionController extends Controller
 {
-    public function reaccion($idFoto, $idReaccion, Request $request)
+    public function reaccion($idFoto, $idReaccion, $tokenVoto,Request $request)
     {
         // 1 = LIKE
         // 2 = DISLIKE
         DB::beginTransaction();
         try {
-            $ipid = DB::select('SELECT * FROM reaccions WHERE foto_id = ? AND terminal_ip = ?', [$idFoto, $request->ip()]);
+            // $ip = $request->ip();
+            $ipid = DB::select("SELECT * FROM reaccions WHERE foto_id = ? AND terminal_ip = ?", [$idFoto, $tokenVoto]);
             if ($idReaccion == 1 && count($ipid) <= 0) {
                 $reaccion = Reaccion::create([
                     'foto_id' => $idFoto,
                     'tipo_reaccion' => true,
                     'fecha' => new DateTime(now()),
-                    'terminal_ip' => $request->ip(),
+                    'terminal_ip' => $tokenVoto,
                 ]);
                 DB::commit();
                 return response()->json([
@@ -83,13 +84,16 @@ class ReaccionController extends Controller
     public function reaccionesTodas(Request $request){
         try {
             DB::beginTransaction();
+
             $reacciones = Reaccion::where('terminal_ip',$request->ip())->get();
+
             DB::commit();
 
             return response()->json($reacciones);
 
         } catch (Exception $ex) {
             DB::rollBack();
+
             return response()->json($ex->getMessage());
         }
     }

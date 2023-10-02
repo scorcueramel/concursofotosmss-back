@@ -18,8 +18,7 @@ class FinalistasController extends Controller
             from fotos f
             inner join albums a
             on f.album_id = a.id
-            order by total desc
-            limit 3');
+            order by total desc');
 
             DB::commit();
 

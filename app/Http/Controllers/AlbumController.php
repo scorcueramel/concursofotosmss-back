@@ -26,12 +26,14 @@ class AlbumController extends Controller
                 ->get();
             // $albums = Album::where('activo', true)->paginate(5);
             $ipLocal = \request()->ip();
+            $tokenVoto = Str::random(20);
             DB::commit();
             return response()->json(
                 [
                     'success' => true,
                     'albums' => $albums,
-                    'ipClient' => $ipLocal
+                    'ipClient' => $ipLocal,
+                    'tokenVoto'=> $tokenVoto,
                 ],
                 200
             );

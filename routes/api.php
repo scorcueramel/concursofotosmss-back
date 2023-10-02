@@ -68,7 +68,7 @@ Route::group([
 ], function ($router) {
     Route::get('albumPublico',[AlbumController::class,'getAlbumsActives']);
     Route::get('fotosAlbumPublic/{id}',[FotoController::class,'getFotosAllStatePublic']);
-    Route::get('reaccion/{idFoto}/{idReact}',[ReaccionController::class,'reaccion']);
+    Route::get('reaccion/{idFoto}/{idReact}/{tokenVotos}',[ReaccionController::class,'reaccion']);
     Route::get('reacciones',[ReaccionController::class,'reaccionesTodas']);
     Route::get('getOnePhotoPublic/{id}', [FotoController::class, 'getOnePhotoPublic']);
     Route::get('getReaccions/{id}', [ReaccionController::class, 'conteoReacciones']);
